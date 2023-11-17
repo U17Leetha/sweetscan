@@ -1,5 +1,6 @@
 # sweetscan   
-<img width="677" alt="image" src="https://github.com/U17Leetha/sweetscan/assets/80220625/947d26a2-6b88-4aad-b823-640e811cb859">
+
+![C4EC0348-8422-4E26-9855-32EE735CF94D_4_5005_c](https://github.com/U17Leetha/sweetscan/assets/80220625/c5a09406-c1c5-415d-85cf-d5b44f90825e)
 
                                                                                            
 A script for resolving domain names to IP addresses, expanding subnets, and running network scanning tools.
