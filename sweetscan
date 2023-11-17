@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+
+import sys
+import subprocess
+import re
+import ipaddress
+
+# Set the output file paths
+fping_output_file = "fping_output.txt"
+fping_alive_file = "fping_alive.txt"
+nmap_output_file = "nmap_output.txt"
+
+# Set the input file paths
+ip_list_file_path = 'ip_list.txt'
+scope_file_path = 'scope.txt'
+output_file = 'output_file.txt'
+
+# Function to resolve domain names to IP addresses
+def resolve_domain_to_ip(domain):
+    try:
+        result = subprocess.check_output(['dig', '+short', domain, 'A']).decode('utf-8').strip()
+        return result.split('\n')
+    except subprocess.CalledProcessError as e:
+        print(f"Error running dig for domain {domain}: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        sys.exit(1)
+
+# Function to expand subnets into individual IP addresses
+def expand_subnet(subnet):
+    subnet = subnet.replace(" ", "")  # Remove spaces within the subnet
+    try:
+        network = ipaddress.IPv4Network(subnet, strict=False)
+        return [str(ip) for ip in network.hosts()]
+    except ipaddress.AddressValueError as e:
+        print(f"Error expanding subnet {subnet}: {e}")
+        sys.exit(1)
+
+# Function to remove leading and trailing whitespaces from each line in a file
+def remove_whitespace(file_path):
+    with open(file_path, 'r') as file:
+        lines = [line.strip() for line in file]
+    with open(file_path, 'w') as file:
+        file.write('\n'.join(lines))
+
+# Remove leading and trailing whitespaces from scope.txt
+remove_whitespace(scope_file_path)
+
+# Run grep to exclude lines with '/'
+try:
+    ip_list = []
+    with open(scope_file_path, 'r') as scope_file:
+        for line in scope_file:
+            line = line.strip()
+            if line:
+                # Check if the line is a subnet
+                if '/' in line:
+                    ip_list.extend(expand_subnet(line))
+                else:
+                    ip_list.extend(resolve_domain_to_ip(line))
+
+    with open(ip_list_file_path, 'w') as ip_list_file:
+        ip_list_file.write('\n'.join(ip_list))
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")
+    sys.exit(1)
+
+# Print a message indicating that the script has finished processing
+print("Script has finished processing.")
+
+# Print the contents of the ip_list file
+with open(ip_list_file_path, 'r') as ip_list:
+    file_contents = ip_list.read()
+    print(f"\nContents of ip_list.txt:\n")
+    print(file_contents)
+
+# Run fping using the ip_list.txt and capture the output
+try:
+    subprocess.run(['fping', '-f', ip_list_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+except subprocess.CalledProcessError as e:
+    with open(fping_output_file, 'w') as fping_output:
+        fping_output.write(f"Error running fping: {e.output.decode()}\n")
+
+# Print a message indicating that fping has finished
+print("fping has finished. See fping_output.txt for results.")
+
+# Run grep with regex to extract ' is alive' IP addresses and write to fping_alive.txt
+try:
+    with open(fping_output_file, 'r') as fping_output:
+        fping_output_content = fping_output.read()
+        match = re.findall(r'\b(?:\d{1,3}\.){3}\d{1,3}\s*is alive\b', fping_output_content)
+        alive_ips = [ip.replace(' is alive', '') for ip in match]
+except FileNotFoundError:
+    # Handle the case when fping_output.txt is not found
+    alive_ips = []
+
+# Create fping_alive.txt and write alive IPs
+with open(fping_alive_file, 'w') as fping_alive:
+    for ip in alive_ips:
+        fping_alive.write(f"{ip}\n")
+
+# Print a message indicating that the script has finished
+print("Script has finished.")
+
+# Run Nmap on the alive IPs and capture the output
+try:
+    subprocess.run(['sudo', 'nmap', '-oN', nmap_output_file, '-p', '1-1000', '-sV', '-O', '-Pn', '-iL', fping_alive_file], check=True)
+except subprocess.CalledProcessError as e:
+    print(f"Error running Nmap: {e}")
+    sys.exit(1)
+
+# Print a message indicating that Nmap has finished
+print("Nmap has finished. See nmap_output.txt for results.")
+
+# Print logo
+print("""
+Compliments of:
+
+███████ ██     ██ ███████ ███████ ████████      ██████  
+██      ██     ██ ██      ██         ██         ██   ██ 
+███████ ██  █  ██ █████   █████      ██         ██████  
+     ██ ██ ███ ██ ██      ██         ██         ██      
+███████  ███ ███  ███████ ███████    ██ ███████ ██      
+                                                        
+                                                        
+
+""")
