@@ -13,17 +13,14 @@ fping (ping utility for network scanning)
 nmap (network scanning tool)
 
 ## Instalation:
-'''bash
-> bash install.sh
-'''
+
+> 'bash install.sh'
 
 ## Usage:
 
 Create a scope.txt file with a list of domain names and subnets (CIDR notation). The tool with automatically remove whitespaces from the scope.txt file.
 
-'''bash
-nano scope.txt
-'''
+> 'nano scope.txt'
 
   example.com
   
@@ -31,9 +28,8 @@ nano scope.txt
   
 ## Run the tool in the same directory as the scope.txt file
 
-'''bash
-sweetscan
-'''
+> 'sweetscan'
+
 
 View the results in the generated output files (ip_list.txt, fping_output.txt, fping_alive.txt, nmap_output.txt).
 
