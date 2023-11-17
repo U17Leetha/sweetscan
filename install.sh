@@ -7,11 +7,11 @@ sudo apt-get install -y dnsutils  # Installs 'dig'
 sudo apt-get install -y fping
 sudo apt-get install -y nmap
 
-# Make the script executable
-chmod +x sweetscan
-
 # Copy the script to /usr/local/bin
 sudo cp sweetscan /usr/local/bin/
+
+# Make the script executable
+sudo chmod +x /usr/local/bin/sweetscan
 
 # Add the directory to $PATH by adding the following line to ~/.bashrc
 echo 'export PATH=$PATH:~/usr’/local/bin >> ~/.bashrc
