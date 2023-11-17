@@ -1,5 +1,6 @@
 # sweetscan
 
+
  █████  █████ ████  ██████████ █████                          █████    █████               
 ░░███  ░░███ ░░███ ░███░░░░███░░███                          ░░███    ░░███                
  ░███   ░███  ░███ ░░░    ███  ░███         ██████   ██████  ███████   ░███████    ██████  
@@ -8,8 +9,9 @@
  ░███   ░███  ░███     ███     ░███      █░███░░░  ░███░░░    ░███ ███ ░███ ░███  ███░░███ 
  ░░████████   █████   ███      ███████████░░██████ ░░██████   ░░█████  ████ █████░░████████
   ░░░░░░░░   ░░░░░   ░░░      ░░░░░░░░░░░  ░░░░░░   ░░░░░░     ░░░░░  ░░░░ ░░░░░  ░░░░░░░░ 
-
-  
+                                                                                           
+                                                                                           
+                                                                                           
 A script for resolving domain names to IP addresses, expanding subnets, and running network scanning tools.
 
 This script is designed to automate the process of resolving domain names to IP addresses, expanding subnets into individual IP addresses, and performing network scanning using tools like fping and nmap. 
