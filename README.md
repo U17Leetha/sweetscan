@@ -14,21 +14,19 @@ nmap (network scanning tool)
 
 ## Instalation:
 
-> 'bash install.sh'
+> bash install.sh
 
 ## Usage:
 
 Create a scope.txt file with a list of domain names and subnets (CIDR notation). The tool with automatically remove whitespaces from the scope.txt file.
 
-> 'nano scope.txt'
-
   example.com
-  
+  10.10.1.2
   192.168.1.0/24
   
 ## Run the tool in the same directory as the scope.txt file
 
-> 'sweetscan'
+> sweetscan
 
 
 View the results in the generated output files (ip_list.txt, fping_output.txt, fping_alive.txt, nmap_output.txt).
