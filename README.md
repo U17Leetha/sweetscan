@@ -14,7 +14,7 @@ nmap (network scanning tool)
 
 ## Instalation:
 '''bash
-bash install.sh
+'bash install.sh'
 '''
 
 ## Usage:
