@@ -6,7 +6,7 @@
 A script for resolving domain names to IP addresses, expanding subnets, and running network scanning tools.
 
 This script is designed to automate the process of resolving domain names to IP addresses, expanding subnets into individual IP addresses, and performing network scanning using tools like fping and nmap. 
-It takes input from a scope.txt file, resolves domain names using dig, and expands subnets. The resulting IP addresses are then used in network scanning tools.
+It takes input from a scope.txt file, resolves domain names using dig, and expands subnets. The resulting IP addresses are then used in network scanning tools such as nmap. This project is a work in progress.
 
 ## Prerequisites:
 
@@ -43,6 +43,10 @@ fping_output.txt: Output of the fping tool.
 fping_alive.txt: List of alive IP addresses from fping results.
 
 nmap_output.txt: Output of the nmap network scanning tool.
+
+nmap_header_script_output_file.txt: Output of nmap http-header-security script 
+
+nmap_cipher_script_output_file.txt: output of nmap ssl-enum-cipher script 
 
 
 ## Additional Notes:
