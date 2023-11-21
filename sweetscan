@@ -20,6 +20,8 @@ output_file = 'output_file.txt'
 # Function to resolve domain names to IP addresses
 def resolve_domain_to_ip(domain):
     try:
+        # Remove characters after ".com"
+        domain = re.sub(r'\.com/.*', '.com', domain)
         result = subprocess.check_output(['dig', '+short', domain, 'A']).decode('utf-8').strip()
         return result.split('\n')
     except subprocess.CalledProcessError as e:
@@ -33,21 +35,36 @@ def resolve_domain_to_ip(domain):
 def expand_subnet(subnet):
     subnet = subnet.replace(" ", "")  # Remove spaces within the subnet
     try:
-        network = ipaddress.IPv4Network(subnet, strict=False)
-        return [str(ip) for ip in network.hosts()]
+        # Check if the subnet is not a domain
+        if not any(protocol in subnet for protocol in ['http://', 'https://']):
+            network = ipaddress.IPv4Network(subnet, strict=False)
+            return [str(ip) for ip in network.hosts()]
+        else:
+            return [subnet]  # Return the domain without expansion
     except ipaddress.AddressValueError as e:
-        print(f"Error expanding subnet {subnet}: {e}")
-        sys.exit(1)
+        # If the subnet cannot be expanded, consider it as a domain
+        return [subnet]
 
-# Function to remove leading and trailing whitespaces from each line in a file
+# Function to remove leading and trailing whitespaces, including spaces and tabs after the IP address
 def remove_whitespace(file_path):
     with open(file_path, 'r') as file:
-        lines = [line.strip() for line in file]
+        lines = [line.strip().replace(' ', '').replace('\t', '') for line in file]
+    with open(file_path, 'w') as file:
+        file.write('\n'.join(lines))
+
+# Function to remove "http://" and "https://" prefixes from each line in a file, and characters after ".com"
+def remove_http_prefix_and_suffix(file_path):
+    with open(file_path, 'r') as file:
+        lines = [re.sub(r'https?://', '', line.strip()) for line in file]
+        lines = [re.sub(r'\.com/.*', '.com', line) for line in lines]
     with open(file_path, 'w') as file:
         file.write('\n'.join(lines))
 
 # Remove leading and trailing whitespaces from scope.txt
 remove_whitespace(scope_file_path)
+
+# Remove "http://" and "https://" prefixes, and characters after ".com" from scope.txt
+remove_http_prefix_and_suffix(scope_file_path)
 
 # Run grep to exclude lines with '/'
 try:
