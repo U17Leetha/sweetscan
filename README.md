@@ -28,7 +28,11 @@ Create a scope.txt file with a list of IP addresses, domain names and subnets (C
   192.168.1.0/24
 
 ## options 
-  <img width="304" alt="image" src="https://github.com/U17Leetha/sweetscan/assets/80220625/c4f886fe-0a95-4d0b-b884-2862ffbc78d8">
+options:
+  -h, --help              show this help message and exit 
+  -a, --skip-fping        Skip fping and use ip_list.txt for remaining tools
+  -u USE_SINGLE, --use-single USE_SINGLE
+                          Use a single IP or Domain for scanning 
 
   
 ## Run the tool in the same directory as the scope.txt file
