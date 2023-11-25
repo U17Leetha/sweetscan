@@ -29,9 +29,13 @@ Create a scope.txt file with a list of IP addresses, domain names and subnets (C
 
 ## options 
 options:
+
   -h, --help              show this help message and exit 
+  
   -a, --skip-fping        Skip fping and use ip_list.txt for remaining tools
+  
   -u USE_SINGLE, --use-single USE_SINGLE
+  
                           Use a single IP or Domain for scanning 
 
   
