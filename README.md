@@ -34,10 +34,8 @@ options:
   
   -a, --skip-fping        Skip fping and use ip_list.txt for remaining tools
   
-  -u USE_SINGLE, --use-single USE_SINGLE
+  -u, --use-single        Use a single IP or Domain for scanning
   
-                          Use a single IP or Domain for scanning 
-
   
 ## Run the tool in the same directory as the scope.txt file
 
