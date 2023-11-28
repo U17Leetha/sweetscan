@@ -14,6 +14,8 @@ Python 3
 dig (DNS lookup tool)
 fping (ping utility for network scanning)
 nmap (network scanning tool)
+subfinder
+nuclei
 
 ## Instalation:
 
@@ -30,11 +32,15 @@ Create a scope.txt file with a list of IP addresses, domain names and subnets (C
 ## options 
 options:
 
-  -h, --help              show this help message and exit 
+  -h, --help                   show this help message and exit 
   
-  -a, --skip-fping        Skip fping and use ip_list.txt for remaining tools
+  -a, --skip-fping             Skip fping and use ip_list.txt for remaining tools
   
-  -u, --use-single        Use a single IP or Domain for scanning
+  -u, --use-single             Use a single IP or Domain for scanning
+
+  -i, --stop-after-ip-list     Stops script after creating ip_list.txt
+
+  -f, stop-after-fping-alive   Stops script after creating fping_alive,txt
   
   
 ## Run the tool in the same directory as the scope.txt file
@@ -57,6 +63,12 @@ nmap_output.txt: Output of the nmap network scanning tool.
 nmap_header_script_output_file.txt: Output of nmap http-header-security script 
 
 nmap_cipher_script_output_file.txt: output of nmap ssl-enum-cipher script 
+
+subfinder_output.txt: output of subfinder tool.
+
+nuclei_report: markdown export of nuclei tool 
+
+nuclei_output.txt: output of nuclei tool in standard format
 
 
 ## Additional Notes:
