@@ -6,6 +6,8 @@ sudo apt-get install -y python3
 sudo apt-get install -y dnsutils  # Installs 'dig'
 sudo apt-get install -y fping
 sudo apt-get install -y nmap
+sudo apt-get install -y subfinder
+sudo apt-get install -y nuclei
 
 # Copy the script to /usr/local/bin
 sudo cp sweetscan /usr/local/bin/
