@@ -12,6 +12,8 @@ fping_alive_file = "fping_alive.txt"
 nmap_output_file = "nmap_output.txt"
 nmap_header_script_output_file = "nmap_header_script_output_file.txt"
 nmap_cipher_script_output_file = "nmap_cipher_script_output_file.txt"
+subfinder_output_file = "subfinder_output.txt"
+nuclei_output_file = "nuclei_output.txt"
 
 # Set the input file paths
 ip_list_file_path = 'ip_list.txt'
@@ -21,6 +23,9 @@ scope_file_path = 'scope.txt'
 parser = argparse.ArgumentParser(description='sweetscan Tool')
 parser.add_argument('-a', '--skip-fping', action='store_true', help='Skip fping and use ip_list.txt for remaining tools')
 parser.add_argument('-u', '--use-single', type=str, help='Use a single IP or domain for scanning')
+parser.add_argument('-i', '--stop-after-ip-list', action='store_true', help='Stop script after creating ip_list.txt')
+parser.add_argument('-f', '--stop-after-fping-alive', action='store_true', help='Stop script after creating fping_alive.txt')
+
 args = parser.parse_args()
 
 # Function to resolve domain names to IP addresses
@@ -96,6 +101,9 @@ else:
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         sys.exit(1)
+if args.stop_after_ip_list:
+    print("Script stopped after creating ip_list.txt.")
+    sys.exit(0)
 
 if not args.skip_fping:
     # Run fping using the ip_list.txt and capture the output
@@ -117,6 +125,17 @@ if not args.skip_fping:
     with open(fping_alive_file, 'w') as fping_alive:
         for ip in alive_ips:
             fping_alive.write(f"{ip}\n")
+if args.stop_after_fping_alive:
+    print("Script stopped after creating fping_alive.txt.")
+    sys.exit(0)
+
+# Subfinder scanning 
+try:
+    input_file_for_subfinder = ip_list_file_path if args.use_single else scope_file_path
+    subprocess.run(['subfinder', '-dL', input_file_for_subfinder, '-silent', '-o', subfinder_output_file], check=True)
+except subprocess.CalledProcessError as e:
+    print(f"Error running Subfinder: {e}")
+    sys.exit(1)
 
 # Nmap scanning
 try:
@@ -132,8 +151,16 @@ except subprocess.CalledProcessError as e:
     print(f"Error running Nmap: {e}")
     sys.exit(1)
 
-print("Script has finished.")
+# Nuclei scanning
+try:
+    input_file_for_nuclei = fping_alive_file if not args.skip_fping else ip_list_file_path
+    subprocess.run(['nuclei', '-list', input_file_for_nuclei, '-markdown-export', 'nuclei_report', '|', 'tee', nuclei_output_file], check=True)
+except subprocess.CalledProcessError as e:
+    print(f"Error running Nuclei: {e}")
+    sys.exit(1)
 
+
+print("Script has finished.")
 
 # Print logo
 print("""
