@@ -14,6 +14,7 @@ nmap_header_script_output_file = "nmap_header_script_output_file.txt"
 nmap_cipher_script_output_file = "nmap_cipher_script_output_file.txt"
 subfinder_output_file = "subfinder_output.txt"
 nuclei_output_file = "nuclei_output.txt"
+master_scope_file = "master_scope.txt"
 
 # Set the input file paths
 ip_list_file_path = 'ip_list.txt'
@@ -43,13 +44,13 @@ def resolve_domain_to_ip(domain):
 
 # Function to expand subnets into individual IP addresses
 def expand_subnet(subnet):
-    subnet = subnet.replace(" ", "")  # Remove spaces within the subnet
+    subnet = subnet.replace(" ", "")
     try:
         if not any(protocol in subnet for protocol in ['http://', 'https://']):
             network = ipaddress.IPv4Network(subnet, strict=False)
             return [str(ip) for ip in network.hosts()]
         else:
-            return [subnet]  # Return the domain without expansion
+            return [subnet]
     except ipaddress.AddressValueError as e:
         return [subnet]
 
@@ -79,13 +80,9 @@ if args.use_single:
     with open(ip_list_file_path, 'w') as ip_list_file:
         ip_list_file.write('\n'.join(ip_list))
 else:
-    # Remove leading and trailing whitespaces from scope.txt
     remove_whitespace(scope_file_path)
-
-    # Remove "http://" and "https://" prefixes, and characters after ".com" from scope.txt
     remove_http_prefix_and_suffix(scope_file_path)
 
-    # Generate ip_list.txt from scope.txt
     try:
         ip_list = []
         with open(scope_file_path, 'r') as scope_file:
@@ -106,14 +103,12 @@ if args.stop_after_ip_list:
     sys.exit(0)
 
 if not args.skip_fping:
-    # Run fping using the ip_list.txt and capture the output
     try:
         subprocess.run(['fping', '-f', ip_list_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     except subprocess.CalledProcessError as e:
         with open(fping_output_file, 'w') as fping_output:
             fping_output.write(f"Error running fping: {e.output.decode()}\n")
 
-    # Extract 'is alive' IP addresses and write to fping_alive.txt
     try:
         with open(fping_output_file, 'r') as fping_output:
             fping_output_content = fping_output.read()
@@ -129,13 +124,44 @@ if args.stop_after_fping_alive:
     print("Script stopped after creating fping_alive.txt.")
     sys.exit(0)
 
-# Subfinder scanning 
 try:
     input_file_for_subfinder = ip_list_file_path if args.use_single else scope_file_path
     subprocess.run(['subfinder', '-dL', input_file_for_subfinder, '-silent', '-o', subfinder_output_file], check=True)
 except subprocess.CalledProcessError as e:
     print(f"Error running Subfinder: {e}")
     sys.exit(1)
+
+scope_domains = set()
+try:
+    with open(scope_file_path, 'r') as scope_file:
+        for line in scope_file:
+            line = line.strip()
+            if '/' in line:
+                expanded_ips = expand_subnet(line)
+                scope_domains.update(expanded_ips)
+            else:
+                scope_domains.add(line)
+except Exception as e:
+    print(f"An unexpected error occurred while reading scope.txt: {e}")
+    sys.exit(1)
+
+subfinder_domains = set()
+try:
+    with open(subfinder_output_file, 'r') as subfinder_output:
+        for line in subfinder_output:
+            line = line.strip()
+            if line.startswith("www."):
+                line = line[4:]  # Remove "www."
+            subfinder_domains.add(line)
+except Exception as e:
+    print(f"An unexpected error occurred while reading subfinder output: {e}")
+    sys.exit(1)
+
+combined_domains = scope_domains.union(subfinder_domains)
+
+with open(master_scope_file, 'w') as output_file:
+    for domain in combined_domains:
+        output_file.write(domain + '\n')
 
 # Nmap scanning
 try:
@@ -153,14 +179,14 @@ except subprocess.CalledProcessError as e:
 
 # Nuclei scanning
 try:
-    input_file_for_nuclei = fping_alive_file if not args.skip_fping else ip_list_file_path
-    subprocess.run(['nuclei', '-list', input_file_for_nuclei, '-markdown-export', 'nuclei_report', '|', 'tee', nuclei_output_file], check=True)
+    input_file_for_nuclei = master_scope_file if not args.skip_fping else ip_list_file_path
+    subprocess.run(['nuclei', '-l', input_file_for_nuclei, '-t', 'nuclei-templates/', '-o', nuclei_output_file], check=True)
 except subprocess.CalledProcessError as e:
     print(f"Error running Nuclei: {e}")
     sys.exit(1)
 
-
 print("Script has finished.")
+
 
 # Print logo
 print("""
